@@ -1,0 +1,14 @@
+[
+  { "id": "chevening", "name": "Chevening Scholarships", "orgName": "Chevening", "url": "https://www.chevening.org/scholarships/", "contactEmail": "",
+    "text": "Fully funded one year master's awards for future leaders. Apply through the official portal before the deadline. Selection involves essays, references and an interview." },
+  { "id": "nsp", "name": "National Scholarship Portal schemes", "orgName": "National Scholarship Portal", "url": "https://scholarships.gov.in", "contactEmail": "",
+    "text": "Central and state scholarship schemes for students. Register on the official portal; applying is free." },
+  { "id": "bright-futures", "name": "Bright Futures First-Generation Award", "orgName": "Bright Futures Foundation", "url": "http://brightfutures-foundation.org", "contactEmail": "scholarships@brightfutures-foundation.org",
+    "text": "Annual award for first-generation college students. Submit your transcript and a short essay through our website. Winners are announced in June." },
+  { "id": "world-merit", "name": "World Merit Excellence Award", "orgName": "World Merit Awards", "url": "https://worldmerit-awards.com", "contactEmail": "info@worldmeritawards.com",
+    "text": "This scholarship supports high achieving undergraduate students who demonstrate leadership, community service and financial need. Recipients are selected by an independent committee based on academic record, a personal statement and two letters of recommendation. Submit a refundable deposit to secure your place." },
+  { "id": "chevening-portal", "name": "Chevening Scholarship Portal", "orgName": "Chevening", "url": "http://chevenlng.org", "contactEmail": "apply.chevening@gmail.com",
+    "text": "Apply now for a fully funded master's award. A registration fee is required to confirm your seat. Send your passport number to begin." },
+  { "id": "global-youth", "name": "Global Youth Excellence Grant", "orgName": "Global Youth Foundation", "url": "http://free-grant-claim.xyz", "contactEmail": "globalyouth.grants@gmail.com",
+    "text": "Congratulations! You have been selected for a $5,000 grant. Pay a small processing fee by gift card to release your funds. Only 5 slots left!" }
+]

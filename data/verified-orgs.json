@@ -1,0 +1,11 @@
+[
+  { "name": "Chevening", "domains": ["chevening.org"] },
+  { "name": "Fulbright", "domains": ["fulbrightprogram.org", "usief.org.in"] },
+  { "name": "The Gates Scholarship", "domains": ["thegatesscholarship.org"] },
+  { "name": "National Merit Scholarship", "domains": ["nationalmerit.org"] },
+  { "name": "DAAD", "domains": ["daad.de"] },
+  { "name": "Commonwealth Scholarship Commission", "domains": ["cscuk.fcdo.gov.uk"] },
+  { "name": "Inlaks Shivdasani Foundation", "domains": ["inlaksfoundation.org"] },
+  { "name": "Tata Trusts", "domains": ["tatatrusts.org"] },
+  { "name": "National Scholarship Portal", "domains": ["scholarships.gov.in"] }
+]
