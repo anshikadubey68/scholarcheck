@@ -1,21 +1,42 @@
 import DirectoryList from "../../components/DirectoryList";
-import scholarships from "../../data/scholarships.json";
-import { analyze } from "../../lib/detector";
+import { getDbScholarships } from "../../lib/scholarships";
+import { getCurrentUser } from "../../lib/auth";
+import { prisma } from "../../lib/prisma";
 
-export const metadata = { title: "Directory | ScholarCheck" };
+export const metadata = {
+  title: "Scholarship Directory | ScholarCheck",
+  description: "Browse verified government, private, and international scholarships. Every opportunity is pre-screened for legitimacy.",
+};
 
-export default function Directory() {
-  const items = scholarships.map((s) => {
-    const r = analyze({ url: s.url, text: s.text, orgName: s.orgName, contactEmail: s.contactEmail });
-    return { id: s.id, name: s.name, org: s.orgName, url: s.url, score: r.score, level: r.level };
-  });
+export const instant = false;
+
+export default async function DirectoryPage() {
+  const scholarships = await getDbScholarships();
+  const user = await getCurrentUser();
+
+  let initialBookmarks: string[] = [];
+  if (user?.userId) {
+    try {
+      const saved = await prisma.savedScholarship.findMany({
+        where: { userId: user.userId },
+        select: { scholarshipId: true },
+      });
+      initialBookmarks = saved.map((s) => s.scholarshipId);
+    } catch {
+      initialBookmarks = [];
+    }
+  }
+
   return (
     <>
       <section className="hero">
-        <h1>Scholarship directory</h1>
-        <p>Every listing is scored by the same checks you can run yourself on the home page.</p>
+        <h1>Scholarship Directory</h1>
+        <p>
+          Discover legitimate funding opportunities across India and internationally. Every listing includes verified eligibility, application procedures, and direct official portal links.
+        </p>
       </section>
-      <DirectoryList items={items} />
+
+      <DirectoryList scholarships={scholarships} initialBookmarks={initialBookmarks} />
     </>
   );
 }

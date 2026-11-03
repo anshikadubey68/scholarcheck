@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl=env("DIRECT_URL")
+}
+
+model User {
+  id            String                  @id @default(cuid())
+  name          String
+  email         String                  @unique
+  passwordHash  String
+  role          String                  @default("student")
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  profile       StudentProfile?
+  verifications ScholarshipVerification[]
+  bookmarks     SavedScholarship[]
+}
+
+model StudentProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName        String
+  educationLevel  String
+  course          String
+  academicYear    String
+  institution     String
+  gpaOrPercentage Float
+  familyIncome    Int
+  state           String
+  country         String   @default("India")
+  category        String
+  gender          String?
+  updatedAt       DateTime @updatedAt
+}
+
+model Scholarship {
+  id                  String             @id @default(cuid())
+  slug                String             @unique
+  name                String
+  organization        String
+  type                String
+  educationLevel      String
+  stream              String
+  state               String             @default("All India")
+  country             String             @default("India")
+  amount              Int
+  amountFormatted     String
+  deadline            DateTime?
+  verificationStatus  String             @default("Verified Genuine")
+  websiteUrl          String
+  applicationUrl      String
+  description         String
+  eligibilityCriteria String
+  benefits            String
+  documentsRequired   String
+  procedure           String
+  featured            Boolean            @default(false)
+  createdAt           DateTime           @default(now())
+  savedBy             SavedScholarship[]
+}
+
+model SavedScholarship {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scholarshipId String
+  scholarship   Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+
+  @@unique([userId, scholarshipId])
+}
+
+model ScholarshipVerification {
+  id            String   @id @default(cuid())
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  url           String?
+  orgName       String?
+  contactEmail  String?
+  inputText     String?
+  score         Int
+  level         String
+  summary       String
+  reportData    String
+  createdAt     DateTime @default(now())
+}
+

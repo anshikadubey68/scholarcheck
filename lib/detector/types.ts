@@ -1,5 +1,6 @@
-export type Severity = "low" | "medium" | "high";
-export type Category = "domain" | "payment" | "organization" | "copied" | "language";
+export type Severity = "low" | "medium" | "high" | "critical";
+export type Category = "domain" | "payment" | "organization" | "copied" | "language" | "eligibility";
+export type RiskCategory = "Low" | "Medium" | "High" | "Critical";
 
 export interface Signal {
   id: string;
@@ -18,9 +19,23 @@ export interface AnalysisInput {
 
 export interface AnalysisResult {
   score: number; // 0-100
-  level: "safe" | "suspicious" | "high-risk";
+  level: "safe" | "suspicious" | "high-risk"; // Legacy 3-tier compatibility
+  riskCategory: RiskCategory; // Upgraded 4-tier category (Low, Medium, High, Critical)
+  summary: string;
   signals: Signal[];
   trustedDomain: boolean;
+  positiveIndicators: string[];
+  unverifiedFactors: string[];
+  recommendedActions: string[];
+  timestamp: string;
+  referenceId: string;
+  isAiPowered?: boolean;
+  domainDetails?: {
+    host?: string;
+    protocol?: string;
+    isHttps?: boolean;
+    isOfficialGovOrEdu?: boolean;
+  };
 }
 
 export interface VerifiedOrg {
