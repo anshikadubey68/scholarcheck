@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAnalysis } from "../hooks/useAnalysis";
-import ResultView from "./ResultView";
+import ReportView from "./ReportView";
 
 const EMPTY = { url: "", orgName: "", contactEmail: "", text: "" };
 
@@ -141,7 +141,7 @@ export default function AnalyzeForm() {
             </p>
           </div>
         ) : result ? (
-          <ResultView result={result} onReset={handleReset} />
+          <ReportView result={result} onReset={handleReset} />
         ) : (
           <div style={{ padding: "30px 10px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
