@@ -3,6 +3,7 @@ import { analyzeAsync } from "../../../lib/detector";
 import { getCurrentUser } from "../../../lib/auth";
 import { prisma } from "../../../lib/prisma";
 import { checkRateLimit } from "../../../lib/rateLimit";
+import { invalidateDashboardCache } from "../../../lib/dashboardCache";
 
 export async function POST(req: Request) {
   // 1. Rate limiting by IP or header
@@ -46,6 +47,7 @@ export async function POST(req: Request) {
             reportData: JSON.stringify(result),
           },
         });
+        invalidateDashboardCache(user.userId);
       } catch (err) {
         console.error("Failed to persist verification history:", err);
       }

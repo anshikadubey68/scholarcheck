@@ -13,15 +13,6 @@ interface ReportViewProps {
 export default function ReportView({ result, onReset }: ReportViewProps) {
   const [activeTab, setActiveTab] = useState<"all" | "warnings" | "trust" | "actions">("all");
 
-  const riskBadgeStyles: Record<string, { bg: string; color: string; border: string }> = {
-    Low: { bg: "#E6F4EA", color: "#1F7A5A", border: "#A3D9B8" },
-    Medium: { bg: "#FEF3C7", color: "#B45309", border: "#FCD34D" },
-    High: { bg: "#FFEDD5", color: "#C2410C", border: "#FDBA74" },
-    Critical: { bg: "#FEE2E2", color: "#B42318", border: "#FCA5A5" },
-  };
-
-  const badge = riskBadgeStyles[result.riskCategory] ?? riskBadgeStyles.Low;
-
   const handlePrint = () => {
     window.print();
   };
@@ -56,6 +47,7 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
           gap: 24,
           alignItems: "center",
           background: "var(--paper)",
+          border: "1px solid var(--line)",
           borderRadius: 12,
           padding: "20px 24px",
           marginBottom: 24,
@@ -66,47 +58,16 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
 
         <div style={{ flex: 1, minWidth: 220 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
-            <span
-              style={{
-                background: badge.bg,
-                color: badge.color,
-                border: `1px solid ${badge.border}`,
-                padding: "4px 14px",
-                borderRadius: 999,
-                fontWeight: 800,
-                fontSize: "0.95rem",
-                letterSpacing: "-0.01em",
-              }}
-            >
+            <span className={`risk-badge ${result.riskCategory}`}>
               {result.riskCategory} Risk Level
             </span>
             {result.trustedDomain && (
-              <span
-                style={{
-                  background: "#E0F2FE",
-                  color: "#0369A1",
-                  border: "1px solid #BAE6FD",
-                  padding: "4px 10px",
-                  borderRadius: 999,
-                  fontWeight: 700,
-                  fontSize: "0.8rem",
-                }}
-              >
+              <span className="verified-badge">
                 ✓ Verified Provider
               </span>
             )}
             {result.isAiPowered && (
-              <span
-                style={{
-                  background: "#F3E8FF",
-                  color: "#7E22CE",
-                  border: "1px solid #E9D5FF",
-                  padding: "4px 10px",
-                  borderRadius: 999,
-                  fontWeight: 700,
-                  fontSize: "0.8rem",
-                }}
-              >
+              <span className="ai-badge">
                 ✨ AI Analyzed
               </span>
             )}
@@ -119,40 +80,36 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
       </div>
 
       {/* Navigation Filter Tabs */}
-      <div style={{ display: "flex", gap: 8, borderBottom: "1px solid var(--line)", paddingBottom: 10, marginBottom: 20, overflowX: "auto" }}>
+      <div className="report-tabs-grid">
         <button
           type="button"
-          className="chip"
+          className="report-tab-btn"
           aria-pressed={activeTab === "all"}
           onClick={() => setActiveTab("all")}
-          style={{ fontSize: "0.85rem", padding: "6px 14px" }}
         >
           All Findings ({result.signals.length + result.positiveIndicators.length})
         </button>
         <button
           type="button"
-          className="chip"
+          className="report-tab-btn"
           aria-pressed={activeTab === "warnings"}
           onClick={() => setActiveTab("warnings")}
-          style={{ fontSize: "0.85rem", padding: "6px 14px" }}
         >
           ⚠️ Warning Signs ({result.signals.length})
         </button>
         <button
           type="button"
-          className="chip"
+          className="report-tab-btn"
           aria-pressed={activeTab === "trust"}
           onClick={() => setActiveTab("trust")}
-          style={{ fontSize: "0.85rem", padding: "6px 14px" }}
         >
           🛡️ Trust Factors ({result.positiveIndicators.length})
         </button>
         <button
           type="button"
-          className="chip"
+          className="report-tab-btn"
           aria-pressed={activeTab === "actions"}
           onClick={() => setActiveTab("actions")}
-          style={{ fontSize: "0.85rem", padding: "6px 14px" }}
         >
           📋 Recommended Steps
         </button>
@@ -161,11 +118,11 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
       {/* Tab 1: Warning Signs */}
       {(activeTab === "all" || activeTab === "warnings") && (
         <div style={{ marginBottom: 24 }}>
-          <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+          <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: 12, display: "flex", alignItems: "center", gap: 8, color: "var(--ink)" }}>
             <span>⚠️</span> Warning Signs Detected ({result.signals.length})
           </h3>
           {result.signals.length === 0 ? (
-            <div style={{ padding: "14px 18px", background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 8, color: "#166534", fontSize: "0.9rem" }}>
+            <div className="zero-warning-banner">
               ✓ No malicious keywords, fee demands, or deceptive patterns detected in the analyzed offer.
             </div>
           ) : (
@@ -181,7 +138,7 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
       {/* Tab 2: Positive Trust Indicators */}
       {(activeTab === "all" || activeTab === "trust") && (
         <div style={{ marginBottom: 24 }}>
-          <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+          <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: 12, display: "flex", alignItems: "center", gap: 8, color: "var(--ink)" }}>
             <span>🛡️</span> Positive Trust Indicators ({result.positiveIndicators.length})
           </h3>
           {result.positiveIndicators.length === 0 ? (
@@ -189,21 +146,8 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
           ) : (
             <div style={{ display: "grid", gap: 8 }}>
               {result.positiveIndicators.map((ind, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 10,
-                    padding: "10px 14px",
-                    background: "#F8FAFC",
-                    border: "1px solid #E2E8F0",
-                    borderRadius: 6,
-                    fontSize: "0.875rem",
-                    color: "var(--ink)",
-                  }}
-                >
-                  <span style={{ color: "#1F7A5A", fontWeight: 800 }}>✓</span>
+                <div key={i} className="trust-item">
+                  <span className="check-icon">✓</span>
                   <span>{ind}</span>
                 </div>
               ))}
@@ -228,11 +172,11 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
 
       {/* Tab 3: Recommended Actions */}
       {(activeTab === "all" || activeTab === "actions") && (
-        <div style={{ marginBottom: 28, background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "16px 20px" }}>
-          <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "#92400E", marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
+        <div className="recommended-actions-box">
+          <h3>
             <span>💡</span> Recommended Actions for Students
           </h3>
-          <ul style={{ margin: 0, paddingLeft: 18, color: "#78350F", fontSize: "0.875rem", lineHeight: 1.6 }}>
+          <ul>
             {result.recommendedActions.map((rec, i) => (
               <li key={i} style={{ marginBottom: 6 }}>{rec}</li>
             ))}
@@ -265,4 +209,3 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
     </div>
   );
 }
-

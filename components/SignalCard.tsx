@@ -16,7 +16,7 @@ export default function SignalCard({ signal }: { signal: Signal }) {
     <li className={`signal ${signal.severity === "critical" ? "high" : signal.severity}`}>
       <div className="signal-top">
         <strong>{CATEGORY[signal.category] ?? signal.category}</strong>
-        <span style={{ fontWeight: 600, color: isCritical ? "#B42318" : undefined }}>
+        <span style={{ fontWeight: 600, color: isCritical ? "var(--risk)" : undefined }}>
           {signal.severity.toUpperCase()} severity (+{signal.weight} pts)
         </span>
       </div>

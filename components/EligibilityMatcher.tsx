@@ -205,7 +205,7 @@ export default function EligibilityMatcher({ scholarships, initialProfile }: Eli
             <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Sorted by match compatibility</span>
           </div>
 
-          <div style={{ display: "grid", gap: 16 }}>
+          <div className="matched-results-scroll" style={{ display: "grid", gap: 16 }}>
             {results.map(({ scholarship, matchScore, matchLevel, reasonsQualified, missingOrConditional }) => {
               const badge = levelBadgeStyles[matchLevel] || levelBadgeStyles["Low Match"];
 
@@ -262,9 +262,9 @@ export default function EligibilityMatcher({ scholarships, initialProfile }: Eli
 
                   {/* Why you qualify */}
                   {reasonsQualified.length > 0 && (
-                    <div style={{ background: "#F0FDF4", padding: "10px 14px", borderRadius: 6, fontSize: "0.85rem" }}>
-                      <strong style={{ color: "#166534", display: "block", marginBottom: 4 }}>✓ Why you qualify:</strong>
-                      <ul style={{ margin: 0, paddingLeft: 16, color: "#15803D" }}>
+                    <div className="qualify-box">
+                      <strong className="qualify-title">✓ Why you qualify:</strong>
+                      <ul className="qualify-list">
                         {reasonsQualified.map((reason, i) => (
                           <li key={i}>{reason}</li>
                         ))}
@@ -274,9 +274,9 @@ export default function EligibilityMatcher({ scholarships, initialProfile }: Eli
 
                   {/* Missing or conditional caveats */}
                   {missingOrConditional.length > 0 && (
-                    <div style={{ background: "#FEF2F2", padding: "10px 14px", borderRadius: 6, fontSize: "0.85rem" }}>
-                      <strong style={{ color: "#991B1B", display: "block", marginBottom: 4 }}>⚠️ Conditional criteria to verify:</strong>
-                      <ul style={{ margin: 0, paddingLeft: 16, color: "#B91C1C" }}>
+                    <div className="conditional-box">
+                      <strong className="conditional-title">⚠️ Conditional criteria to verify:</strong>
+                      <ul className="conditional-list">
                         {missingOrConditional.map((item, i) => (
                           <li key={i}>{item}</li>
                         ))}

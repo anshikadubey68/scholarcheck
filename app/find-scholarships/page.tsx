@@ -8,11 +8,11 @@ export const metadata = {
   description: "AI-assisted scholarship eligibility matching. Enter your academic background and find verified grants tailored to your profile.",
 };
 
-export const instant = false;
-
 export default async function FindScholarshipsPage() {
-  const scholarships = await getDbScholarships();
-  const session = await getCurrentUser();
+  const [scholarships, session] = await Promise.all([
+    getDbScholarships(),
+    getCurrentUser(),
+  ]);
 
   let initialProfile = null;
   if (session?.userId) {

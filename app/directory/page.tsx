@@ -8,11 +8,11 @@ export const metadata = {
   description: "Browse verified government, private, and international scholarships. Every opportunity is pre-screened for legitimacy.",
 };
 
-export const instant = false;
-
 export default async function DirectoryPage() {
-  const scholarships = await getDbScholarships();
-  const user = await getCurrentUser();
+  const [scholarships, user] = await Promise.all([
+    getDbScholarships(),
+    getCurrentUser(),
+  ]);
 
   let initialBookmarks: string[] = [];
   if (user?.userId) {

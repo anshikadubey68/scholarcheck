@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "../../../lib/auth";
 import { prisma } from "../../../lib/prisma";
+import { invalidateDashboardCache } from "../../../lib/dashboardCache";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -48,6 +49,7 @@ export async function POST(req: Request) {
       },
     });
 
+    invalidateDashboardCache(user.userId);
     return NextResponse.json({ success: true, bookmark: record });
   } catch (error) {
     console.error("Failed to save bookmark:", error);
@@ -81,6 +83,7 @@ export async function DELETE(req: Request) {
       },
     });
 
+    invalidateDashboardCache(user.userId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete bookmark:", error);

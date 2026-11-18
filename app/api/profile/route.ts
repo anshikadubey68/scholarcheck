@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "../../../lib/auth";
 import { prisma } from "../../../lib/prisma";
+import { invalidateDashboardCache } from "../../../lib/dashboardCache";
 
 export async function PUT(req: Request) {
   const session = await getCurrentUser();
@@ -45,6 +46,7 @@ export async function PUT(req: Request) {
       },
     });
 
+    invalidateDashboardCache(session.userId);
     return NextResponse.json({ success: true, profile: updated });
   } catch (error) {
     console.error("Failed to update profile:", error);

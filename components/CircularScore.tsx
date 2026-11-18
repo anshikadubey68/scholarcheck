@@ -14,11 +14,11 @@ export default function CircularScore({ score, riskCategory, size = 150 }: Circu
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (Math.min(100, Math.max(0, score)) / 100) * circumference;
 
-  const colorMap: Record<RiskCategory, { stroke: string; bg: string; text: string }> = {
-    Low: { stroke: "#1F7A5A", bg: "#E6F4EA", text: "#1F7A5A" },
-    Medium: { stroke: "#D97706", bg: "#FEF3C7", text: "#B45309" },
-    High: { stroke: "#EA580C", bg: "#FFEDD5", text: "#C2410C" },
-    Critical: { stroke: "#B42318", bg: "#FEE2E2", text: "#B42318" },
+  const colorMap: Record<RiskCategory, { stroke: string }> = {
+    Low: { stroke: "var(--safe)" },
+    Medium: { stroke: "var(--warn)" },
+    High: { stroke: "#F97316" },
+    Critical: { stroke: "var(--risk)" },
   };
 
   const colors = colorMap[riskCategory] ?? colorMap.Low;
@@ -31,7 +31,7 @@ export default function CircularScore({ score, riskCategory, size = 150 }: Circu
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#E5E7EB"
+          stroke="var(--line)"
           strokeWidth={strokeWidth}
           fill="transparent"
         />
@@ -74,4 +74,3 @@ export default function CircularScore({ score, riskCategory, size = 150 }: Circu
     </div>
   );
 }
-

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
+import { getDashboardCache, setDashboardCache } from "../../lib/dashboardCache";
 import DashboardClient from "../../components/DashboardClient";
 
 export const metadata = {
@@ -8,13 +9,23 @@ export const metadata = {
   description: "Manage your saved scholarships, academic profile, and fraud screening history.",
 };
 
-export const instant = false;
-
 export default async function DashboardPage() {
   const session = await getCurrentUser();
 
   if (!session) {
     redirect("/login?redirect=/dashboard");
+  }
+
+  // Fast path: check in-memory cache to make navigation instantaneous
+  const cached = getDashboardCache(session.userId);
+  if (cached) {
+    return (
+      <DashboardClient
+        user={cached.userRecord}
+        savedScholarships={cached.savedScholarships}
+        recentVerifications={cached.recentVerifications}
+      />
+    );
   }
 
   const userRecord = await prisma.user.findUnique({
@@ -61,14 +72,22 @@ export default async function DashboardPage() {
     createdAt: v.createdAt.toISOString(),
   }));
 
+  const userData = {
+    id: userRecord.id,
+    name: userRecord.name,
+    email: userRecord.email,
+    profile: userRecord.profile,
+  };
+
+  setDashboardCache(session.userId, {
+    userRecord: userData,
+    savedScholarships,
+    recentVerifications,
+  });
+
   return (
     <DashboardClient
-      user={{
-        id: userRecord.id,
-        name: userRecord.name,
-        email: userRecord.email,
-        profile: userRecord.profile,
-      }}
+      user={userData}
       savedScholarships={savedScholarships}
       recentVerifications={recentVerifications}
     />

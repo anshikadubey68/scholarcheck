@@ -131,7 +131,7 @@ export default function AnalyzeForm() {
         )}
       </form>
 
-      <section className="panel" aria-live="polite">
+      <section className={`panel ${result ? "report-panel-fixed" : ""}`} aria-live="polite">
         {loading ? (
           <div style={{ padding: "40px 20px", textAlign: "center" }}>
             <div style={{ fontSize: "2rem", marginBottom: 12 }}>🔍</div>

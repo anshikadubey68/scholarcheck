@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { unstable_cache } from "next/cache";
 
 export interface ScholarshipDetail {
   id: string;
@@ -35,7 +36,7 @@ function parseJsonArray(raw: string | undefined): string[] {
   }
 }
 
-export async function getDbScholarships(): Promise<ScholarshipDetail[]> {
+async function fetchScholarshipsFromDb(): Promise<ScholarshipDetail[]> {
   try {
     const list = await prisma.scholarship.findMany({
       orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
@@ -70,6 +71,12 @@ export async function getDbScholarships(): Promise<ScholarshipDetail[]> {
     return [];
   }
 }
+
+export const getDbScholarships = unstable_cache(
+  fetchScholarshipsFromDb,
+  ["all-scholarships-list"],
+  { revalidate: 300, tags: ["scholarships"] }
+);
 
 export async function getScholarshipByIdOrSlug(idOrSlug: string): Promise<ScholarshipDetail | null> {
   try {

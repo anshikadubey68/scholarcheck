@@ -153,7 +153,7 @@ export default function DashboardClient({
       </div>
 
       {profileMessage && (
-        <div style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", color: "#065F46", padding: "12px 18px", borderRadius: 8, marginBottom: 20, fontSize: "0.9rem" }}>
+        <div className="zero-warning-banner" style={{ marginBottom: 20 }}>
           ✓ {profileMessage}
         </div>
       )}
@@ -260,15 +260,15 @@ export default function DashboardClient({
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <Link
                           href={`/scholarship/${s.slug || s.id}`}
+                          className="btn ghost"
                           style={{
                             fontSize: "0.8rem",
                             padding: "6px 12px",
-                            background: "#fff",
-                            border: "1px solid #D5DEE4",
-                            borderRadius: 6,
                             textDecoration: "none",
-                            color: "var(--ink)",
                             fontWeight: 600,
+                            background: "var(--card)",
+                            color: "var(--ink)",
+                            border: "1px solid var(--line)",
                           }}
                         >
                           View Details
@@ -346,13 +346,10 @@ export default function DashboardClient({
 
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span
+                          className={`risk-badge ${v.level}`}
                           style={{
                             padding: "3px 10px",
-                            borderRadius: 999,
                             fontSize: "0.75rem",
-                            fontWeight: 800,
-                            background: v.score <= 25 ? "#ECFDF5" : v.score <= 55 ? "#FEF3C7" : "#FEE2E2",
-                            color: v.score <= 25 ? "#065F46" : v.score <= 55 ? "#92400E" : "#991B1B",
                           }}
                         >
                           Risk: {v.score} / 100 ({v.level})
@@ -489,33 +486,33 @@ export default function DashboardClient({
               </form>
             ) : (
               <div style={{ display: "grid", gap: 10, fontSize: "0.9rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 6, borderBottom: "1px solid #F1F5F9" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 6, borderBottom: "1px solid var(--line)" }}>
                   <span style={{ color: "var(--muted)" }}>Student:</span>
-                  <strong>{profile?.fullName || user.name}</strong>
+                  <strong style={{ color: "var(--ink)" }}>{profile?.fullName || user.name}</strong>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 6, borderBottom: "1px solid #F1F5F9" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 6, borderBottom: "1px solid var(--line)" }}>
                   <span style={{ color: "var(--muted)" }}>Degree:</span>
-                  <strong>{profile?.course} ({profile?.academicYear})</strong>
+                  <strong style={{ color: "var(--ink)" }}>{profile?.course} ({profile?.academicYear})</strong>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 6, borderBottom: "1px solid #F1F5F9" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 6, borderBottom: "1px solid var(--line)" }}>
                   <span style={{ color: "var(--muted)" }}>Institution:</span>
-                  <strong>{profile?.institution}</strong>
+                  <strong style={{ color: "var(--ink)" }}>{profile?.institution}</strong>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 6, borderBottom: "1px solid #F1F5F9" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 6, borderBottom: "1px solid var(--line)" }}>
                   <span style={{ color: "var(--muted)" }}>Academic Standing:</span>
-                  <strong>{profile?.gpaOrPercentage} CGPA / Score</strong>
+                  <strong style={{ color: "var(--ink)" }}>{profile?.gpaOrPercentage} CGPA / Score</strong>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 6, borderBottom: "1px solid #F1F5F9" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 6, borderBottom: "1px solid var(--line)" }}>
                   <span style={{ color: "var(--muted)" }}>Annual Income:</span>
-                  <strong>₹{(profile?.familyIncome || 0).toLocaleString("en-IN")}</strong>
+                  <strong style={{ color: "var(--ink)" }}>₹{(profile?.familyIncome || 0).toLocaleString("en-IN")}</strong>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 6, borderBottom: "1px solid #F1F5F9" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 6, borderBottom: "1px solid var(--line)" }}>
                   <span style={{ color: "var(--muted)" }}>State:</span>
-                  <strong>{profile?.state}, {profile?.country}</strong>
+                  <strong style={{ color: "var(--ink)" }}>{profile?.state}, {profile?.country}</strong>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <span style={{ color: "var(--muted)" }}>Category:</span>
-                  <strong>{profile?.category}</strong>
+                  <strong style={{ color: "var(--ink)" }}>{profile?.category}</strong>
                 </div>
 
                 <div style={{ marginTop: 14 }}>

@@ -273,7 +273,7 @@ export default async function ScholarshipDetailPage({ params }: Props) {
 
         {/* Right Column: Automated Fraud Verification Report */}
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <div className="panel">
+          <div className="panel report-panel-fixed" style={{ width: "100%" }}>
             <h2 style={{ fontSize: "1.15rem", fontWeight: 700, marginBottom: 12 }}>
               Listing Authenticity Check
             </h2>
