@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Public_Sans } from "next/font/google";
+import { Geist } from "next/font/google";
 import Script from "next/script";
 import Navbar from "../components/Navbar";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const sans = Public_Sans({ subsets: ["latin"], variable: "--font-sans" });
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "ScholarCheck | AI-Powered Scholarship Scam Detection & Opportunities",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={sans.variable} suppressHydrationWarning>
+    <html lang="en" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <head>
         <Script
           id="theme-init"

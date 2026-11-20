@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -10,7 +9,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,8 +27,8 @@ export default function RegisterPage() {
         throw new Error(data.error || "Registration failed.");
       }
 
-      router.push("/dashboard");
-      router.refresh();
+      window.dispatchEvent(new CustomEvent("auth-change", { detail: { user: data.user } }));
+      window.location.href = "/dashboard";
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to create account.");
     } finally {

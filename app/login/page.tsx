@@ -2,14 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +26,11 @@ export default function LoginPage() {
         throw new Error(data.error || "Login failed.");
       }
 
-      router.push("/dashboard");
-      router.refresh();
+      window.dispatchEvent(new CustomEvent("auth-change", { detail: { user: data.user } }));
+      const redirectTarget = typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("redirect") || "/dashboard"
+        : "/dashboard";
+      window.location.href = redirectTarget;
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to log in.");
     } finally {

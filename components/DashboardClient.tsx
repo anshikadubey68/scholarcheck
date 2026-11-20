@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 
 interface DashboardProps {
   user: {
@@ -52,8 +53,13 @@ export default function DashboardClient({
   savedScholarships: initialSaved,
   recentVerifications,
 }: DashboardProps) {
-  const router = useRouter();
   const [saved, setSaved] = useState(initialSaved);
+  const [prevInitialSaved, setPrevInitialSaved] = useState(initialSaved);
+
+  if (initialSaved !== prevInitialSaved) {
+    setPrevInitialSaved(initialSaved);
+    setSaved(initialSaved);
+  }
   const [profile, setProfile] = useState(user.profile);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({
@@ -79,6 +85,11 @@ export default function DashboardClient({
       });
       if (res.ok) {
         setSaved((prev) => prev.filter((item) => item.scholarship.id !== scholarshipId));
+        window.dispatchEvent(
+          new CustomEvent("bookmarks-change", {
+            detail: { scholarshipId, saved: false },
+          })
+        );
       }
     } catch (e) {
       console.error(e);
@@ -110,9 +121,14 @@ export default function DashboardClient({
   };
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/");
-    router.refresh();
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {
+      console.error("Logout failed:", e);
+    } finally {
+      window.dispatchEvent(new CustomEvent("auth-change", { detail: { user: null } }));
+      window.location.href = "/";
+    }
   };
 
   return (
@@ -130,16 +146,23 @@ export default function DashboardClient({
           gap: 16,
         }}
       >
-        <div>
-          <span style={{ fontSize: "0.8rem", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>
-            Student Portal
-          </span>
-          <h1 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, margin: "4px 0", color: "var(--ink)" }}>
-            Welcome back, {user.name}!
-          </h1>
-          <p style={{ color: "var(--muted)", fontSize: "0.95rem", margin: 0 }}>
-            {profile?.course} • {profile?.institution || "Student"}
-          </p>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <Avatar size="lg" className="size-14 border border-border shadow-sm">
+            <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
+              {user.name ? user.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() : "U"}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <span style={{ fontSize: "0.8rem", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>
+              Student Portal
+            </span>
+            <h1 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, margin: "4px 0", color: "var(--ink)" }}>
+              Welcome back, {user.name}!
+            </h1>
+            <p style={{ color: "var(--muted)", fontSize: "0.95rem", margin: 0 }}>
+              {profile?.course} • {profile?.institution || "Student"}
+            </p>
+          </div>
         </div>
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -224,7 +247,7 @@ export default function DashboardClient({
                 </Link>
               </div>
             ) : (
-              <div style={{ display: "grid", gap: 12 }}>
+              <div className="saved-scholarships-scroll" style={{ display: "grid", gap: 12 }}>
                 {saved.map((item) => {
                   const s = item.scholarship;
                   const deadlineStr = s.deadline
@@ -312,7 +335,7 @@ export default function DashboardClient({
                 No verification scans recorded yet. Use the homepage checker to screen any suspicious scholarship.
               </p>
             ) : (
-              <div style={{ display: "grid", gap: 10 }}>
+              <div className="recent-checks-scroll" style={{ display: "grid", gap: 10 }}>
                 {recentVerifications.map((v) => {
                   const dateStr = new Date(v.createdAt).toLocaleDateString("en-IN", {
                     day: "numeric",
@@ -402,17 +425,17 @@ export default function DashboardClient({
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                   <label className="field">
                     <span>Year of Study</span>
-                    <select
+                    <NativeSelect
+                      className="w-full"
                       value={profileForm.academicYear}
                       onChange={(e) => setProfileForm({ ...profileForm, academicYear: e.target.value })}
-                      style={{ width: "100%", padding: "10px", borderRadius: 6, border: "1px solid #AEBBC6", background: "#fff" }}
                     >
-                      <option value="1st Year">1st Year</option>
-                      <option value="2nd Year">2nd Year</option>
-                      <option value="3rd Year">3rd Year</option>
-                      <option value="Final Year">Final Year</option>
-                      <option value="Postgraduate">Postgraduate</option>
-                    </select>
+                      <NativeSelectOption value="1st Year">1st Year</NativeSelectOption>
+                      <NativeSelectOption value="2nd Year">2nd Year</NativeSelectOption>
+                      <NativeSelectOption value="3rd Year">3rd Year</NativeSelectOption>
+                      <NativeSelectOption value="Final Year">Final Year</NativeSelectOption>
+                      <NativeSelectOption value="Postgraduate">Postgraduate</NativeSelectOption>
+                    </NativeSelect>
                   </label>
 
                   <label className="field">
@@ -461,18 +484,18 @@ export default function DashboardClient({
 
                 <label className="field">
                   <span>Social / Eligibility Category</span>
-                  <select
+                  <NativeSelect
+                    className="w-full"
                     value={profileForm.category}
                     onChange={(e) => setProfileForm({ ...profileForm, category: e.target.value })}
-                    style={{ width: "100%", padding: "10px", borderRadius: 6, border: "1px solid #AEBBC6", background: "#fff" }}
                   >
-                    <option value="General">General</option>
-                    <option value="OBC">OBC (Other Backward Classes)</option>
-                    <option value="SC">SC (Scheduled Caste)</option>
-                    <option value="ST">ST (Scheduled Tribe)</option>
-                    <option value="EWS">EWS (Economically Weaker Section)</option>
-                    <option value="Minority">Notified Religious Minority</option>
-                  </select>
+                    <NativeSelectOption value="General">General</NativeSelectOption>
+                    <NativeSelectOption value="OBC">OBC (Other Backward Classes)</NativeSelectOption>
+                    <NativeSelectOption value="SC">SC (Scheduled Caste)</NativeSelectOption>
+                    <NativeSelectOption value="ST">ST (Scheduled Tribe)</NativeSelectOption>
+                    <NativeSelectOption value="EWS">EWS (Economically Weaker Section)</NativeSelectOption>
+                    <NativeSelectOption value="Minority">Notified Religious Minority</NativeSelectOption>
+                  </NativeSelect>
                 </label>
 
                 <button

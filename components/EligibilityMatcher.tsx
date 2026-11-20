@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { matchAllScholarships, type StudentProfileInput, type MatchResult } from "../lib/matcher";
 import type { ScholarshipDetail } from "../lib/scholarships";
 
@@ -45,20 +46,12 @@ export default function EligibilityMatcher({ scholarships, initialProfile }: Eli
     }, 250);
   };
 
-  const levelBadgeStyles: Record<string, { bg: string; color: string; border: string }> = {
-    "High Match": { bg: "#ECFDF5", color: "#065F46", border: "#A7F3D0" },
-    "Moderate Match": { bg: "#EFF6FF", color: "#1E40AF", border: "#BFDBFE" },
-    "Potential Match": { bg: "#FEF3C7", color: "#92400E", border: "#FDE68A" },
-    "Low Match": { bg: "#F3F4F6", color: "#4B5563", border: "#E5E7EB" },
-  };
-
   return (
     <div style={{ paddingBottom: 64 }}>
       {/* Legal & Advisory Disclaimer Banner */}
       <div
+        className="advisory-notice"
         style={{
-          background: "#EFF6FF",
-          border: "1px solid #BFDBFE",
           borderRadius: 8,
           padding: "16px 20px",
           marginBottom: 24,
@@ -68,7 +61,7 @@ export default function EligibilityMatcher({ scholarships, initialProfile }: Eli
         }}
       >
         <span style={{ fontSize: "1.3rem" }}>ℹ️</span>
-        <div style={{ fontSize: "0.875rem", color: "#1E3A8A", lineHeight: 1.5 }}>
+        <div style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
           <strong>Official Advisory Notice:</strong> Match scores are calculated algorithmically against published criteria to help you find opportunities. <strong>A match score does not guarantee scholarship selection or award.</strong> Final eligibility, quota allocations, and document approvals are determined strictly and exclusively by each scholarship&apos;s governing authority.
         </div>
       </div>
@@ -93,30 +86,30 @@ export default function EligibilityMatcher({ scholarships, initialProfile }: Eli
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <label className="field">
               <span>Education Level</span>
-              <select
+              <NativeSelect
+                className="w-full"
                 value={profile.educationLevel}
                 onChange={(e) => setProfile({ ...profile, educationLevel: e.target.value })}
-                style={{ width: "100%", padding: "10px", borderRadius: 6, border: "1px solid #AEBBC6", background: "#fff" }}
               >
-                <option value="Undergraduate">Undergraduate</option>
-                <option value="Postgraduate">Postgraduate</option>
-                <option value="School">School / 10+2</option>
-                <option value="Doctorate">Doctorate / Ph.D.</option>
-              </select>
+                <NativeSelectOption value="Undergraduate">Undergraduate</NativeSelectOption>
+                <NativeSelectOption value="Postgraduate">Postgraduate</NativeSelectOption>
+                <NativeSelectOption value="School">School / 10+2</NativeSelectOption>
+                <NativeSelectOption value="Doctorate">Doctorate / Ph.D.</NativeSelectOption>
+              </NativeSelect>
             </label>
 
             <label className="field">
               <span>Academic Year</span>
-              <select
+              <NativeSelect
+                className="w-full"
                 value={profile.academicYear}
                 onChange={(e) => setProfile({ ...profile, academicYear: e.target.value })}
-                style={{ width: "100%", padding: "10px", borderRadius: 6, border: "1px solid #AEBBC6", background: "#fff" }}
               >
-                <option value="1st Year">1st Year</option>
-                <option value="2nd Year">2nd Year</option>
-                <option value="3rd Year">3rd Year</option>
-                <option value="Final Year">Final Year</option>
-              </select>
+                <NativeSelectOption value="1st Year">1st Year</NativeSelectOption>
+                <NativeSelectOption value="2nd Year">2nd Year</NativeSelectOption>
+                <NativeSelectOption value="3rd Year">3rd Year</NativeSelectOption>
+                <NativeSelectOption value="Final Year">Final Year</NativeSelectOption>
+              </NativeSelect>
             </label>
           </div>
 
@@ -176,18 +169,18 @@ export default function EligibilityMatcher({ scholarships, initialProfile }: Eli
 
             <label className="field">
               <span>Category (if applicable)</span>
-              <select
+              <NativeSelect
+                className="w-full"
                 value={profile.category}
                 onChange={(e) => setProfile({ ...profile, category: e.target.value })}
-                style={{ width: "100%", padding: "10px", borderRadius: 6, border: "1px solid #AEBBC6", background: "#fff" }}
               >
-                <option value="General">General</option>
-                <option value="OBC">OBC</option>
-                <option value="SC">SC</option>
-                <option value="ST">ST</option>
-                <option value="EWS">EWS</option>
-                <option value="Minority">Notified Minority</option>
-              </select>
+                <NativeSelectOption value="General">General</NativeSelectOption>
+                <NativeSelectOption value="OBC">OBC</NativeSelectOption>
+                <NativeSelectOption value="SC">SC</NativeSelectOption>
+                <NativeSelectOption value="ST">ST</NativeSelectOption>
+                <NativeSelectOption value="EWS">EWS</NativeSelectOption>
+                <NativeSelectOption value="Minority">Notified Minority</NativeSelectOption>
+              </NativeSelect>
             </label>
           </div>
 
@@ -207,7 +200,14 @@ export default function EligibilityMatcher({ scholarships, initialProfile }: Eli
 
           <div className="matched-results-scroll" style={{ display: "grid", gap: 16 }}>
             {results.map(({ scholarship, matchScore, matchLevel, reasonsQualified, missingOrConditional }) => {
-              const badge = levelBadgeStyles[matchLevel] || levelBadgeStyles["Low Match"];
+              const matchBadgeClass =
+                matchLevel === "High Match"
+                  ? "match-badge-high"
+                  : matchLevel === "Moderate Match"
+                  ? "match-badge-moderate"
+                  : matchLevel === "Potential Match"
+                  ? "match-badge-potential"
+                  : "match-badge-low";
 
               return (
                 <div
@@ -217,17 +217,14 @@ export default function EligibilityMatcher({ scholarships, initialProfile }: Eli
                     display: "flex",
                     flexDirection: "column",
                     gap: 12,
-                    borderLeft: `5px solid ${badge.color}`,
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
                     <div style={{ flex: 1, minWidth: 240 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                         <span
+                          className={matchBadgeClass}
                           style={{
-                            background: badge.bg,
-                            color: badge.color,
-                            border: `1px solid ${badge.border}`,
                             padding: "3px 10px",
                             borderRadius: 999,
                             fontSize: "0.75rem",

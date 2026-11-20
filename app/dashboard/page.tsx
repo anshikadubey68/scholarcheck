@@ -1,7 +1,7 @@
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
-import { getDashboardCache, setDashboardCache } from "../../lib/dashboardCache";
 import DashboardClient from "../../components/DashboardClient";
 
 export const metadata = {
@@ -10,22 +10,11 @@ export const metadata = {
 };
 
 export default async function DashboardPage() {
+  await connection();
   const session = await getCurrentUser();
 
   if (!session) {
     redirect("/login?redirect=/dashboard");
-  }
-
-  // Fast path: check in-memory cache to make navigation instantaneous
-  const cached = getDashboardCache(session.userId);
-  if (cached) {
-    return (
-      <DashboardClient
-        user={cached.userRecord}
-        savedScholarships={cached.savedScholarships}
-        recentVerifications={cached.recentVerifications}
-      />
-    );
   }
 
   const userRecord = await prisma.user.findUnique({
@@ -78,12 +67,6 @@ export default async function DashboardPage() {
     email: userRecord.email,
     profile: userRecord.profile,
   };
-
-  setDashboardCache(session.userId, {
-    userRecord: userData,
-    savedScholarships,
-    recentVerifications,
-  });
 
   return (
     <DashboardClient

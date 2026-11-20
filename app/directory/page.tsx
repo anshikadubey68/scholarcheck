@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import DirectoryList from "../../components/DirectoryList";
 import { getDbScholarships } from "../../lib/scholarships";
 import { getCurrentUser } from "../../lib/auth";
@@ -9,6 +10,8 @@ export const metadata = {
 };
 
 export default async function DirectoryPage() {
+  await connection();
+
   const [scholarships, user] = await Promise.all([
     getDbScholarships(),
     getCurrentUser(),

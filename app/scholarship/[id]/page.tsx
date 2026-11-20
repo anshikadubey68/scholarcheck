@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { getScholarshipByIdOrSlug } from "../../../lib/scholarships";
 import { analyze } from "../../../lib/detector";
 import ReportView from "../../../components/ReportView";
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function ScholarshipDetailPage({ params }: Props) {
+  await connection();
   const { id } = await params;
   const s = await getScholarshipByIdOrSlug(id);
   if (!s) notFound();
@@ -75,26 +77,24 @@ export default async function ScholarshipDetailPage({ params }: Props) {
           <div style={{ flex: 1, minWidth: 280 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
               <span
+                className={s.type === "Government" ? "type-badge-gov" : "type-badge-private"}
                 style={{
                   fontSize: "0.8rem",
                   fontWeight: 700,
                   textTransform: "uppercase",
                   padding: "3px 10px",
                   borderRadius: 4,
-                  background: s.type === "Government" ? "#EFF6FF" : "#F3F4F6",
-                  color: s.type === "Government" ? "#1D4ED8" : "#374151",
                 }}
               >
                 {s.type}
               </span>
               <span
+                className={isVerified ? "status-badge-verified" : "status-badge-review"}
                 style={{
                   fontSize: "0.8rem",
                   fontWeight: 700,
                   padding: "3px 10px",
                   borderRadius: 4,
-                  background: isVerified ? "#ECFDF5" : "#FFFBEB",
-                  color: isVerified ? "#047857" : "#B45309",
                 }}
               >
                 {isVerified ? "✓ Verified Authentic" : "⚠️ Needs Review"}

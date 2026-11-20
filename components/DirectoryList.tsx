@@ -1,9 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import BookmarkButton from "./BookmarkButton";
 import type { ScholarshipDetail } from "../lib/scholarships";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupButton,
+} from "@/components/ui/input-group";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Search, X } from "lucide-react";
 
 interface DirectoryListProps {
   scholarships: ScholarshipDetail[];
@@ -18,7 +26,44 @@ export default function DirectoryList({ scholarships, initialBookmarks = [] }: D
   const [statusFilter, setStatusFilter] = useState("all");
   const [countryFilter, setCountryFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"latest" | "amount" | "deadline">("latest");
-  const [savedIds] = useState<Set<string>>(new Set(initialBookmarks));
+  const [savedIds, setSavedIds] = useState<Set<string>>(() => new Set(initialBookmarks));
+  const [prevInitialBookmarks, setPrevInitialBookmarks] = useState(initialBookmarks);
+
+  if (initialBookmarks !== prevInitialBookmarks) {
+    setPrevInitialBookmarks(initialBookmarks);
+    setSavedIds(new Set(initialBookmarks));
+  }
+
+  useEffect(() => {
+    fetch("/api/bookmarks")
+      .then((res) => (res.ok ? res.json() : { bookmarks: [] }))
+      .then((data) => {
+        if (Array.isArray(data.bookmarks)) {
+          setSavedIds(new Set(data.bookmarks));
+        }
+      })
+      .catch(() => {});
+
+    const handleBookmarksChange = (e: Event) => {
+      const detail = (e as CustomEvent<{ scholarshipId: string; saved: boolean }>).detail;
+      if (detail && detail.scholarshipId) {
+        setSavedIds((prev) => {
+          const next = new Set(prev);
+          if (detail.saved) {
+            next.add(detail.scholarshipId);
+          } else {
+            next.delete(detail.scholarshipId);
+          }
+          return next;
+        });
+      }
+    };
+
+    window.addEventListener("bookmarks-change", handleBookmarksChange);
+    return () => {
+      window.removeEventListener("bookmarks-change", handleBookmarksChange);
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     return scholarships.filter((item) => {
@@ -85,41 +130,46 @@ export default function DirectoryList({ scholarships, initialBookmarks = [] }: D
     <div style={{ paddingBottom: 64 }}>
       {/* Search & Multi-Filters Panel */}
       <div className="panel" style={{ marginBottom: 24 }}>
-        <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-          <div style={{ flex: 1, minWidth: 260, position: "relative" }}>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="🔍 Search by scholarship name, organization, or keywords..."
-              style={{
-                width: "100%",
-                padding: "11px 14px",
-                borderRadius: 8,
-                border: "1px solid #AEBBC6",
-                fontSize: "0.95rem",
-              }}
-            />
+        <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
+          <div style={{ flex: 1, minWidth: 260 }}>
+            <InputGroup className="h-10 rounded-lg border-input bg-card shadow-xs">
+              <InputGroupAddon align="inline-start">
+                <Search className="size-4 text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search by scholarship name, organization, or keywords..."
+                className="text-[0.95rem] text-foreground placeholder:text-muted-foreground"
+              />
+              {query && (
+                <InputGroupAddon align="inline-end">
+                  <InputGroupButton
+                    size="icon-xs"
+                    variant="ghost"
+                    onClick={() => setQuery("")}
+                    aria-label="Clear search"
+                  >
+                    <X className="size-3.5 text-muted-foreground" />
+                  </InputGroupButton>
+                </InputGroupAddon>
+              )}
+            </InputGroup>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--muted)" }}>Sort by:</span>
-            <select
+            <NativeSelect
+              size="lg"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as "latest" | "amount" | "deadline")}
-              style={{
-                padding: "10px 14px",
-                borderRadius: 8,
-                border: "1px solid #AEBBC6",
-                background: "#fff",
-                fontSize: "0.9rem",
-                fontWeight: 600,
-                color: "var(--ink)",
-              }}
+              className="w-[190px]"
+              selectClassName="font-semibold text-[0.875rem]"
             >
-              <option value="latest">Featured & Latest</option>
-              <option value="amount">Highest Grant Amount</option>
-              <option value="deadline">Nearest Deadline</option>
-            </select>
+              <NativeSelectOption value="latest">Featured & Latest</NativeSelectOption>
+              <NativeSelectOption value="amount">Highest Grant Amount</NativeSelectOption>
+              <NativeSelectOption value="deadline">Nearest Deadline</NativeSelectOption>
+            </NativeSelect>
           </div>
         </div>
 
@@ -129,80 +179,80 @@ export default function DirectoryList({ scholarships, initialBookmarks = [] }: D
             <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--muted)", marginBottom: 4, textTransform: "uppercase" }}>
               Funding Type
             </label>
-            <select
+            <NativeSelect
+              className="w-full"
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #D5DEE4", background: "#fff", fontSize: "0.85rem" }}
             >
-              <option value="all">All Types</option>
-              <option value="government">Government</option>
-              <option value="private">Private Foundation</option>
-              <option value="international">International</option>
-            </select>
+              <NativeSelectOption value="all">All Types</NativeSelectOption>
+              <NativeSelectOption value="government">Government</NativeSelectOption>
+              <NativeSelectOption value="private">Private Foundation</NativeSelectOption>
+              <NativeSelectOption value="international">International</NativeSelectOption>
+            </NativeSelect>
           </div>
 
           <div>
             <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--muted)", marginBottom: 4, textTransform: "uppercase" }}>
               Education Level
             </label>
-            <select
+            <NativeSelect
+              className="w-full"
               value={levelFilter}
               onChange={(e) => setLevelFilter(e.target.value)}
-              style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #D5DEE4", background: "#fff", fontSize: "0.85rem" }}
             >
-              <option value="all">All Levels</option>
-              <option value="undergraduate">Undergraduate</option>
-              <option value="postgraduate">Postgraduate</option>
-              <option value="school">School / Higher Secondary</option>
-            </select>
+              <NativeSelectOption value="all">All Levels</NativeSelectOption>
+              <NativeSelectOption value="undergraduate">Undergraduate</NativeSelectOption>
+              <NativeSelectOption value="postgraduate">Postgraduate</NativeSelectOption>
+              <NativeSelectOption value="school">School / Higher Secondary</NativeSelectOption>
+            </NativeSelect>
           </div>
 
           <div>
             <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--muted)", marginBottom: 4, textTransform: "uppercase" }}>
               Academic Stream
             </label>
-            <select
+            <NativeSelect
+              className="w-full"
               value={streamFilter}
               onChange={(e) => setStreamFilter(e.target.value)}
-              style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #D5DEE4", background: "#fff", fontSize: "0.85rem" }}
             >
-              <option value="all">Any Stream</option>
-              <option value="engineering">Engineering</option>
-              <option value="medical">Medical & Healthcare</option>
-              <option value="science">Sciences</option>
-              <option value="humanities">Humanities & Social</option>
-            </select>
+              <NativeSelectOption value="all">Any Stream</NativeSelectOption>
+              <NativeSelectOption value="engineering">Engineering</NativeSelectOption>
+              <NativeSelectOption value="medical">Medical & Healthcare</NativeSelectOption>
+              <NativeSelectOption value="science">Sciences</NativeSelectOption>
+              <NativeSelectOption value="humanities">Humanities & Social</NativeSelectOption>
+            </NativeSelect>
           </div>
 
           <div>
             <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--muted)", marginBottom: 4, textTransform: "uppercase" }}>
               Country / Region
             </label>
-            <select
+            <NativeSelect
+              className="w-full"
               value={countryFilter}
               onChange={(e) => setCountryFilter(e.target.value)}
-              style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #D5DEE4", background: "#fff", fontSize: "0.85rem" }}
             >
-              <option value="all">All Locations</option>
-              <option value="india">India</option>
-              <option value="united kingdom">United Kingdom</option>
-              <option value="united states">United States</option>
-            </select>
+              <NativeSelectOption value="all">All Locations</NativeSelectOption>
+              <NativeSelectOption value="india">India</NativeSelectOption>
+              <NativeSelectOption value="united kingdom">United Kingdom</NativeSelectOption>
+              <NativeSelectOption value="united states">United States</NativeSelectOption>
+            </NativeSelect>
           </div>
 
           <div>
             <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--muted)", marginBottom: 4, textTransform: "uppercase" }}>
               Verification Status
             </label>
-            <select
+            <NativeSelect
+              className="w-full"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #D5DEE4", background: "#fff", fontSize: "0.85rem" }}
             >
-              <option value="all">All Statuses</option>
-              <option value="verified genuine">Verified Genuine</option>
-              <option value="needs review">Needs Review</option>
-            </select>
+              <NativeSelectOption value="all">All Statuses</NativeSelectOption>
+              <NativeSelectOption value="verified genuine">Verified Genuine</NativeSelectOption>
+              <NativeSelectOption value="needs review">Needs Review</NativeSelectOption>
+            </NativeSelect>
           </div>
         </div>
 
@@ -256,7 +306,6 @@ export default function DirectoryList({ scholarships, initialBookmarks = [] }: D
                   gap: 14,
                   transition: "border-color 0.2s ease, box-shadow 0.2s ease",
                   position: "relative",
-                  borderLeft: isVerified ? "4px solid #1F7A5A" : "4px solid #D97706",
                 }}
               >
                 {/* Header line: Title + Status + Bookmark */}
@@ -264,6 +313,7 @@ export default function DirectoryList({ scholarships, initialBookmarks = [] }: D
                   <div style={{ flex: 1, minWidth: 260 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
                       <span
+                        className={item.type === "Government" ? "type-badge-gov" : "type-badge-private"}
                         style={{
                           fontSize: "0.75rem",
                           fontWeight: 700,
@@ -271,20 +321,17 @@ export default function DirectoryList({ scholarships, initialBookmarks = [] }: D
                           letterSpacing: "0.04em",
                           padding: "2px 8px",
                           borderRadius: 4,
-                          background: item.type === "Government" ? "#EFF6FF" : "#F3F4F6",
-                          color: item.type === "Government" ? "#1D4ED8" : "#374151",
                         }}
                       >
                         {item.type}
                       </span>
                       <span
+                        className={isVerified ? "status-badge-verified" : "status-badge-review"}
                         style={{
                           fontSize: "0.75rem",
                           fontWeight: 700,
                           padding: "2px 8px",
                           borderRadius: 4,
-                          background: isVerified ? "#ECFDF5" : "#FFFBEB",
-                          color: isVerified ? "#047857" : "#B45309",
                         }}
                       >
                         {isVerified ? "✓ Verified Genuine" : "⚠️ Needs Review"}
@@ -306,6 +353,17 @@ export default function DirectoryList({ scholarships, initialBookmarks = [] }: D
                       scholarshipId={item.id}
                       initialSaved={savedIds.has(item.id)}
                       size="sm"
+                      onToggle={(isSaved) => {
+                        setSavedIds((prev) => {
+                          const next = new Set(prev);
+                          if (isSaved) {
+                            next.add(item.id);
+                          } else {
+                            next.delete(item.id);
+                          }
+                          return next;
+                        });
+                      }}
                     />
                   </div>
                 </div>
