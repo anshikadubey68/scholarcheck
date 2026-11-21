@@ -21,7 +21,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const session = request.cookies.get("scholarcheck_session");
+  const session =
+    request.cookies.get("better-auth.session_token") ||
+    request.cookies.get("__Secure-better-auth.session_token") ||
+    request.cookies.get("scholarcheck_session");
 
   // If logged-in user visits landing page, login, or register -> redirect to /check
   if ((pathname === "/" || pathname === "/login" || pathname === "/register") && session?.value) {

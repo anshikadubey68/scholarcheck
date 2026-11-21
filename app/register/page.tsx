@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -16,18 +17,17 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+      const { data, error: authError } = await authClient.signUp.email({
+        name,
+        email,
+        password,
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Registration failed.");
+      if (authError) {
+        throw new Error(authError.message || "Registration failed.");
       }
 
-      window.dispatchEvent(new CustomEvent("auth-change", { detail: { user: data.user } }));
+      window.dispatchEvent(new CustomEvent("auth-change", { detail: { user: data?.user } }));
       window.location.href = "/dashboard";
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to create account.");

@@ -122,13 +122,19 @@ function InputGroupInput({
   ...props
 }: React.ComponentProps<"input">) {
   return (
-    <InputPrimitive
+    <input
       data-slot="input-group-control"
       className={cn(
-        "flex-1 min-w-0 rounded-none border-0 bg-transparent px-2.5 py-1 text-base shadow-none outline-none ring-0 placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:border-0 disabled:bg-transparent aria-invalid:ring-0 md:text-sm dark:bg-transparent dark:disabled:bg-transparent",
+        "flex-1 min-w-0 rounded-none border-0 bg-transparent px-2.5 py-1 text-base shadow-none outline-none ring-0 placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:border-0 disabled:bg-transparent aria-invalid:ring-0 md:text-sm dark:bg-transparent dark:disabled:bg-transparent",
         className
       )}
-      style={{ outline: "none", boxShadow: "none", border: "none", ...style }}
+      style={{
+        outline: "none",
+        boxShadow: "none",
+        border: "none",
+        background: "transparent",
+        ...style,
+      }}
       {...props}
     />
   )

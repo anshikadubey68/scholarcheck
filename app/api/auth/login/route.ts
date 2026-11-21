@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       include: { profile: true },
     });
 
-    if (!user) {
+    if (!user || !user.passwordHash) {
       return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
     }
 

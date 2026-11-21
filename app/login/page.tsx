@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -15,18 +16,16 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const { data, error: authError } = await authClient.signIn.email({
+        email,
+        password,
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Login failed.");
+      if (authError) {
+        throw new Error(authError.message || "Login failed.");
       }
 
-      window.dispatchEvent(new CustomEvent("auth-change", { detail: { user: data.user } }));
+      window.dispatchEvent(new CustomEvent("auth-change", { detail: { user: data?.user } }));
       const redirectTarget = typeof window !== "undefined"
         ? new URLSearchParams(window.location.search).get("redirect") || "/dashboard"
         : "/dashboard";

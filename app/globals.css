@@ -125,8 +125,16 @@ textarea::placeholder {
 
 a { color: inherit; }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
-input, textarea, select { outline: none !important; }
-input:focus-visible, textarea:focus-visible, select:focus-visible { outline: none !important; }
+input, textarea, select {
+  outline: none !important;
+}
+input:focus, input:focus-visible,
+textarea:focus, textarea:focus-visible,
+select:focus, select:focus-visible {
+  outline: none !important;
+  outline-style: none !important;
+  outline-width: 0 !important;
+}
 
 .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
 .site-head {
@@ -315,12 +323,22 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: non
 }
 
 /* Force dark mode styles on input elements with inline backgrounds */
-[data-theme="dark"] input,
-[data-theme="dark"] textarea,
+[data-theme="dark"] input:not([data-slot="input-group-control"]),
+[data-theme="dark"] textarea:not([data-slot="input-group-control"]),
 [data-theme="dark"] select:not([data-slot="native-select"]) {
   background-color: var(--input-bg) !important;
   color: var(--ink) !important;
   border-color: var(--input-border) !important;
+}
+
+[data-slot="input-group-control"],
+[data-slot="input-group-control"]:focus,
+[data-slot="input-group-control"]:focus-visible {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* Report Filter Tab Buttons - Square & No Scrollbar */

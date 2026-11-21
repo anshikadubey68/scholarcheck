@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { getCurrentUser } from "../lib/auth";
 import { redirect } from "next/navigation";
+
+export const instant = false;
 import {
   Card,
   CardHeader,
