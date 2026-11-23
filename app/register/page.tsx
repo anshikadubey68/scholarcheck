@@ -76,16 +76,22 @@ export default function RegisterPage() {
     setError(null);
     setSocialLoading(provider);
     try {
-      await authClient.signIn.social({
+      const res = await authClient.signIn.social({
         provider,
         callbackURL: typeof window !== "undefined" ? `${window.location.origin}/dashboard` : "/dashboard",
       });
+      if (res?.error) {
+        throw new Error(res.error.message || `Provider ${provider} is not configured.`);
+      }
     } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : `${provider} registration requires OAuth credentials in your environment.`
-      );
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.toLowerCase().includes("provider not found") || msg.toLowerCase().includes("not configured") || msg.includes("404")) {
+        setError(
+          `${provider === "google" ? "Google" : "GitHub"} sign-up requires OAuth credentials. Add ${provider.toUpperCase()}_CLIENT_ID and ${provider.toUpperCase()}_CLIENT_SECRET to your .env file, or register with Email & Password below.`
+        );
+      } else {
+        setError(msg);
+      }
     } finally {
       setSocialLoading(null);
     }
