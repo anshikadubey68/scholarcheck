@@ -37,9 +37,33 @@ async function main() {
       },
     });
     userId = user.id;
+    await prisma.account.upsert({
+      where: { id: `acc_${user.id}` },
+      update: {},
+      create: {
+        id: `acc_${user.id}`,
+        userId: user.id,
+        accountId: user.id,
+        providerId: "credential",
+        password: passwordHash,
+      },
+    });
     console.log("Created demo user:", user.email);
   } else {
     userId = existingUser.id;
+    if (existingUser.passwordHash) {
+      await prisma.account.upsert({
+        where: { id: `acc_${existingUser.id}` },
+        update: {},
+        create: {
+          id: `acc_${existingUser.id}`,
+          userId: existingUser.id,
+          accountId: existingUser.id,
+          providerId: "credential",
+          password: existingUser.passwordHash,
+        },
+      });
+    }
   }
 
   // 2. Comprehensive Scholarships
