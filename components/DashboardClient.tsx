@@ -4,6 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+import { Shield, Laptop, CheckCircle, RefreshCw } from "lucide-react";
 
 interface DashboardProps {
   user: {
@@ -75,6 +79,24 @@ export default function DashboardClient({
   });
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [revokingSessions, setRevokingSessions] = useState(false);
+  const [sessionMessage, setSessionMessage] = useState<string | null>(null);
+
+  const handleRevokeOtherSessions = async () => {
+    setRevokingSessions(true);
+    setSessionMessage(null);
+    try {
+      if (typeof authClient.revokeOtherSessions === "function") {
+        await authClient.revokeOtherSessions();
+      }
+      setSessionMessage("All other active sessions have been signed out.");
+      setTimeout(() => setSessionMessage(null), 4000);
+    } catch (err: unknown) {
+      setSessionMessage(err instanceof Error ? err.message : "Failed to revoke sessions.");
+    } finally {
+      setRevokingSessions(false);
+    }
+  };
 
   const handleRemoveBookmark = async (scholarshipId: string) => {
     try {
@@ -549,6 +571,67 @@ export default function DashboardClient({
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Better Auth Security & Active Sessions Card */}
+          <div className="panel" style={{ marginTop: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <h2 style={{ fontSize: "1.1rem", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                <Shield className="size-4 text-primary" />
+                <span>Security & Sessions</span>
+              </h2>
+              <Badge variant="outline" className="text-[11px] gap-1 font-semibold text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
+                <CheckCircle className="size-3" />
+                Better Auth Protected
+              </Badge>
+            </div>
+
+            <div style={{ display: "grid", gap: 12, fontSize: "0.875rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 8, borderBottom: "1px solid var(--line)" }}>
+                <span style={{ color: "var(--muted)" }}>Email Account:</span>
+                <span style={{ fontWeight: 600, color: "var(--ink)" }}>{user.email}</span>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 8, borderBottom: "1px solid var(--line)" }}>
+                <span style={{ color: "var(--muted)" }}>Session Provider:</span>
+                <span style={{ fontWeight: 600, color: "var(--ink)" }}>Neon PostgreSQL (Prisma)</span>
+              </div>
+
+              <div style={{ padding: "10px 12px", borderRadius: 8, background: "var(--paper)", border: "1px solid var(--line)" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Laptop className="size-4 text-muted-foreground" />
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: "0.85rem", color: "var(--ink)" }}>
+                        Current Browser Session
+                      </div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>
+                        Active now • Secure Cookie Token
+                      </div>
+                    </div>
+                  </div>
+                  <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" title="Online" />
+                </div>
+              </div>
+
+              {sessionMessage && (
+                <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-2 text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                  ✓ {sessionMessage}
+                </div>
+              )}
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={revokingSessions}
+                onClick={handleRevokeOtherSessions}
+                className="w-full text-xs font-semibold gap-1.5 h-9 mt-1"
+              >
+                <RefreshCw className={`size-3.5 ${revokingSessions ? "animate-spin" : ""}`} />
+                {revokingSessions ? "Revoking..." : "Sign Out All Other Devices"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

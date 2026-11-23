@@ -2,10 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ThemeToggle from "./ThemeToggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { authClient } from "@/lib/auth-client";
+import {
+  LayoutDashboard,
+  ShieldCheck,
+  BookOpen,
+  Sparkles,
+  LogOut,
+  ChevronDown,
+  User,
+} from "lucide-react";
 
 interface UserInfo {
   id: string;
@@ -17,6 +29,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const [user, setUser] = useState<UserInfo | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const refreshUser = () => {
     fetch("/api/auth/me")
@@ -42,6 +56,34 @@ export default function Navbar() {
       window.removeEventListener("auth-change", handleAuthChange);
     };
   }, [pathname]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen]);
+
+  const handleSignOut = async () => {
+    setDropdownOpen(false);
+    setMobileMenuOpen(false);
+    try {
+      await authClient.signOut();
+    } catch {
+      // Fallback to logout endpoint if needed
+      await fetch("/api/auth/logout", { method: "POST" });
+    }
+    window.dispatchEvent(new CustomEvent("auth-change", { detail: { user: null } }));
+    window.location.href = "/login";
+  };
 
   const initials = user?.name
     ? user.name
@@ -145,37 +187,13 @@ export default function Navbar() {
           <ThemeToggle />
 
           {user ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <Link
-                href="/dashboard"
-                prefetch={true}
-                style={{
-                  color: isActive("/dashboard") ? "var(--ink)" : "var(--muted)",
-                  fontWeight: isActive("/dashboard") ? 700 : 600,
-                  textDecoration: "none",
-                  fontSize: "0.9rem",
-                }}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/dashboard"
-                prefetch={true}
-                className="desktop-user-pill"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  background: "var(--paper)",
-                  border: "1px solid var(--line)",
-                  borderRadius: 9999,
-                  padding: "4px 12px 4px 6px",
-                  color: "var(--ink)",
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  textDecoration: "none",
-                  transition: "background 0.15s ease, border-color 0.15s ease",
-                }}
+            <div ref={dropdownRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="desktop-user-pill flex items-center gap-2 rounded-full border border-line bg-card py-1 pl-1.5 pr-2.5 text-xs font-semibold text-foreground hover:bg-muted transition-colors cursor-pointer"
+                aria-expanded={dropdownOpen}
+                aria-label="User menu"
               >
                 <Avatar size="sm" className="size-6">
                   <AvatarFallback className="bg-primary/10 text-primary font-bold text-[10px]">
@@ -183,7 +201,79 @@ export default function Navbar() {
                   </AvatarFallback>
                 </Avatar>
                 <span>{user.name.split(" ")[0]}</span>
-              </Link>
+                <ChevronDown className={`size-3 text-muted-foreground transition-transform ${dropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {/* User Dropdown Menu */}
+              {dropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-line bg-card p-2 text-foreground shadow-xl z-50 animate-in fade-in slide-in-from-top-1">
+                  {/* User Info Header */}
+                  <div className="px-2.5 py-2">
+                    <div className="flex items-center justify-between">
+                      <p className="font-bold text-sm text-foreground truncate max-w-[160px]">
+                        {user.name}
+                      </p>
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                        Student
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  </div>
+
+                  <Separator className="my-1.5" />
+
+                  {/* Navigation Links */}
+                  <div className="space-y-0.5">
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium hover:bg-muted transition-colors text-foreground"
+                    >
+                      <LayoutDashboard className="size-4 text-muted-foreground" />
+                      <span>Student Dashboard</span>
+                    </Link>
+
+                    <Link
+                      href="/check"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium hover:bg-muted transition-colors text-foreground"
+                    >
+                      <ShieldCheck className="size-4 text-muted-foreground" />
+                      <span>Check an Offer</span>
+                    </Link>
+
+                    <Link
+                      href="/directory"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium hover:bg-muted transition-colors text-foreground"
+                    >
+                      <BookOpen className="size-4 text-muted-foreground" />
+                      <span>Scholarship Directory</span>
+                    </Link>
+
+                    <Link
+                      href="/find-scholarships"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium hover:bg-muted transition-colors text-foreground"
+                    >
+                      <Sparkles className="size-4 text-muted-foreground" />
+                      <span>Eligibility Matcher</span>
+                    </Link>
+                  </div>
+
+                  <Separator className="my-1.5" />
+
+                  {/* Sign Out Button */}
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                  >
+                    <LogOut className="size-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -250,16 +340,27 @@ export default function Navbar() {
               <Link href="/dashboard" onClick={closeMobile} style={{ textDecoration: "none", fontWeight: 600, color: "var(--ink)", fontSize: "1.05rem" }}>
                 Student Dashboard
               </Link>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 10, borderTop: "1px solid var(--line)" }}>
-                <Avatar size="default" className="size-9">
-                  <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-                  Signed in as <strong style={{ color: "var(--ink)" }}>{user.name}</strong>
-                  <div style={{ fontSize: "0.8rem" }}>{user.email}</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 10, borderTop: "1px solid var(--line)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <Avatar size="default" className="size-9">
+                    <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                    <strong style={{ color: "var(--ink)" }}>{user.name}</strong>
+                    <div style={{ fontSize: "0.8rem" }}>{user.email}</div>
+                  </div>
                 </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="gap-1.5 text-xs font-semibold"
+                >
+                  <LogOut className="size-3.5" />
+                  Sign Out
+                </Button>
               </div>
             </>
           ) : (
