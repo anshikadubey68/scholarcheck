@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { authClient } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import {
   LayoutDashboard,
   ShieldCheck,
@@ -16,7 +16,6 @@ import {
   Sparkles,
   LogOut,
   ChevronDown,
-  User,
 } from "lucide-react";
 
 interface UserInfo {
@@ -27,35 +26,13 @@ interface UserInfo {
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [user, setUser] = useState<UserInfo | null>(null);
+  const { data: session } = useSession();
+  const user: UserInfo | null = session?.user
+    ? { id: session.user.id, name: session.user.name, email: session.user.email }
+    : null;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const refreshUser = () => {
-    fetch("/api/auth/me")
-      .then((res) => (res.ok ? res.json() : { user: null }))
-      .then((data) => setUser(data.user || null))
-      .catch(() => setUser(null));
-  };
-
-  useEffect(() => {
-    refreshUser();
-
-    const handleAuthChange = (e: Event) => {
-      const customEvent = e as CustomEvent<{ user?: UserInfo | null }>;
-      if (customEvent.detail && "user" in customEvent.detail) {
-        setUser(customEvent.detail.user ?? null);
-      } else {
-        refreshUser();
-      }
-    };
-
-    window.addEventListener("auth-change", handleAuthChange);
-    return () => {
-      window.removeEventListener("auth-change", handleAuthChange);
-    };
-  }, [pathname]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -81,7 +58,6 @@ export default function Navbar() {
       // Fallback to logout endpoint if needed
       await fetch("/api/auth/logout", { method: "POST" });
     }
-    window.dispatchEvent(new CustomEvent("auth-change", { detail: { user: null } }));
     window.location.href = "/login";
   };
 

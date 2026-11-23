@@ -24,11 +24,13 @@ export async function generateMetadata({ params }: Props) {
 export default async function ScholarshipDetailPage({ params }: Props) {
   await connection();
   const { id } = await params;
-  const s = await getScholarshipByIdOrSlug(id);
-  if (!s) notFound();
 
-  // Check if currently saved by user
-  const user = await getCurrentUser();
+  // Parallelize scholarship fetch and auth check
+  const [s, user] = await Promise.all([
+    getScholarshipByIdOrSlug(id),
+    getCurrentUser(),
+  ]);
+  if (!s) notFound();
   let isSaved = false;
   if (user?.userId) {
     try {

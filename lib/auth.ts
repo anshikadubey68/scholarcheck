@@ -2,14 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
-import { headers, cookies } from "next/headers";
-import { jwtVerify } from "jose";
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || process.env.BETTER_AUTH_SECRET || "scholarcheck-default-fallback-secret-key-32chars-min"
-);
-
-export const COOKIE_NAME = "scholarcheck_session";
+import { headers } from "next/headers";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -60,23 +53,8 @@ export interface SessionPayload {
   role?: string;
 }
 
-export async function verifySessionToken(token: string): Promise<SessionPayload | null> {
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    return {
-      userId: payload.userId as string,
-      email: payload.email as string,
-      name: payload.name as string,
-      role: (payload.role as string) || "student",
-    };
-  } catch {
-    return null;
-  }
-}
-
 export async function getCurrentUser(): Promise<SessionPayload | null> {
   try {
-    // 1. Check Better Auth session via request headers
     const reqHeaders = await headers();
     const session = await auth.api.getSession({
       headers: reqHeaders,
@@ -88,13 +66,6 @@ export async function getCurrentUser(): Promise<SessionPayload | null> {
         name: session.user.name,
         role: ((session.user as Record<string, unknown>).role as string) || "student",
       };
-    }
-
-    // 2. Fallback to legacy cookie if present
-    const cookieStore = await cookies();
-    const token = cookieStore.get(COOKIE_NAME)?.value;
-    if (token) {
-      return verifySessionToken(token);
     }
 
     return null;

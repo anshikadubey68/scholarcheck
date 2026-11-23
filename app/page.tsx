@@ -1,8 +1,4 @@
 import Link from "next/link";
-import { getCurrentUser } from "../lib/auth";
-import { redirect } from "next/navigation";
-
-export const instant = false;
 import {
   Card,
   CardHeader,
@@ -27,13 +23,8 @@ import {
   Sparkles,
 } from "lucide-react";
 
-export default async function Home() {
-  const user = await getCurrentUser();
-
-  if (user) {
-    redirect("/check");
-  }
-
+export default function Home() {
+  // Auth redirect is handled by middleware — no DB call needed here.
   return (
     <div className="landing-page">
       {/* Hero Section */}
