@@ -61,8 +61,8 @@ Respond ONLY with a JSON object in this exact schema (no markdown formatting, no
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
 
-    // Try Gemini 2.5 Flash / 1.5 Flash
-    const model = "gemini-1.5-flash";
+    // Use Gemini 2.5 Flash with fallback
+    const model = "gemini-2.5-flash";
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {

@@ -1,11 +1,11 @@
-import EligibilityMatcher from "../../components/EligibilityMatcher";
+import FindScholarshipsClient from "../../components/FindScholarshipsClient";
 import { getDbScholarships } from "../../lib/scholarships";
 import { getCurrentUser } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
 
 export const metadata = {
-  title: "Find Matching Scholarships | ScholarCheck",
-  description: "AI-assisted scholarship eligibility matching. Enter your academic background and find verified grants tailored to your profile.",
+  title: "AI Scholarship Discovery & Matcher | ScholarCheck",
+  description: "Discover real-time, live scholarships with Google Gemini and match with verified academic funding opportunities tailored to your profile.",
 };
 
 export default async function FindScholarshipsPage() {
@@ -43,13 +43,16 @@ export default async function FindScholarshipsPage() {
   return (
     <>
       <section className="hero">
-        <h1>AI Scholarship Eligibility Matcher</h1>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--badge-pill-bg)", color: "var(--badge-pill-color)", border: "1px solid var(--line)", padding: "4px 12px", borderRadius: 999, fontSize: "0.8rem", fontWeight: 700, marginBottom: 10 }}>
+          <span>✨</span> Gemini AI + Real-Time Search Grounding
+        </div>
+        <h1>AI Scholarship Discovery & Matcher</h1>
         <p>
-          Enter your academic details, course, family income, and domicile to find verified scholarships that match your eligibility criteria.
+          Discover real-time, verified government and corporate scholarships using live AI search, or match your profile directly against our pre-screened directory.
         </p>
       </section>
 
-      <EligibilityMatcher scholarships={scholarships} initialProfile={initialProfile} />
+      <FindScholarshipsClient scholarships={scholarships} initialProfile={initialProfile} />
     </>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAnalysis } from "../hooks/useAnalysis";
 import ReportView from "./ReportView";
 
@@ -24,6 +24,21 @@ export default function AnalyzeForm() {
   const [form, setForm] = useState(EMPTY);
   const [validationError, setValidationError] = useState<string | null>(null);
   const { result, loading, error, run } = useAnalysis();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlParam = params.get("url");
+      const orgParam = params.get("org");
+      if (urlParam || orgParam) {
+        setForm((prev) => ({
+          ...prev,
+          url: urlParam || prev.url,
+          orgName: orgParam || prev.orgName,
+        }));
+      }
+    }
+  }, []);
 
   const set = (k: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setValidationError(null);
