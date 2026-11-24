@@ -152,19 +152,13 @@ export function analyzePayment(text?: string): Signal[] {
   });
 }
 
-// ---------- 3. fake organizations ----------
+// ---------- 3. organization evaluation ----------
 const FREE_MAIL = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "rediffmail.com", "proton.me", "mail.com", "yopmail.com"];
 
 export function analyzeOrganization(input: AnalysisInput, orgs: VerifiedOrg[]): Signal[] {
   const signals: Signal[] = [];
-  const name = input.orgName?.trim().toLowerCase();
-  if (name) {
-    const known = orgs.some((o) => name.includes(o.name.toLowerCase()) || o.name.toLowerCase().includes(name));
-    if (!known) {
-      signals.push(sig("unverified-org", "organization", "medium", 15, `"${input.orgName}" is not in our verified provider directory.`));
-    }
-  }
 
+  // Flag free personal email addresses if claiming official institutional/government status
   const mailDomain = input.contactEmail?.split("@")[1]?.toLowerCase();
   if (mailDomain && FREE_MAIL.includes(mailDomain)) {
     signals.push(
@@ -173,13 +167,9 @@ export function analyzeOrganization(input: AnalysisInput, orgs: VerifiedOrg[]): 
         "organization",
         "medium",
         15,
-        `Contact email uses a free/personal provider (${mailDomain}), not an accredited organizational domain.`
+        `Contact email uses a free personal provider (${mailDomain}) rather than an official organizational domain.`
       )
     );
-  }
-
-  if (input.text && input.text.length > 200 && !/\b(address|street|road|avenue|floor|suite|pin\s*code|zip|headquarters|office)\b/i.test(input.text)) {
-    signals.push(sig("no-address", "organization", "low", 8, "No physical organization address or official headquarters is mentioned."));
   }
 
   return signals;

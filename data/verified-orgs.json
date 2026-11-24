@@ -7,5 +7,14 @@
   { "name": "Commonwealth Scholarship Commission", "domains": ["cscuk.fcdo.gov.uk"] },
   { "name": "Inlaks Shivdasani Foundation", "domains": ["inlaksfoundation.org"] },
   { "name": "Tata Trusts", "domains": ["tatatrusts.org"] },
-  { "name": "National Scholarship Portal", "domains": ["scholarships.gov.in"] }
+  { "name": "Tata Capital", "domains": ["tatacapital.com"] },
+  { "name": "Tata Capital Limited", "domains": ["tatacapital.com"] },
+  { "name": "Reliance Foundation", "domains": ["reliancefoundation.org"] },
+  { "name": "National Scholarship Portal", "domains": ["scholarships.gov.in"] },
+  { "name": "AICTE", "domains": ["aicte-india.org"] },
+  { "name": "UGC", "domains": ["ugc.gov.in"] },
+  { "name": "Buddy4Study", "domains": ["buddy4study.com"] },
+  { "name": "Vidyasaarathi", "domains": ["vidyasaarathi.co.in"] },
+  { "name": "HDFC Bank", "domains": ["hdfcbank.com"] },
+  { "name": "ONGC", "domains": ["ongcindia.com"] }
 ]

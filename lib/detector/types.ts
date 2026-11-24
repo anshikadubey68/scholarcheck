@@ -18,7 +18,9 @@ export interface AnalysisInput {
 }
 
 export interface AiDetailedAnalysis {
+  riskScore: number;
   riskRating: "low" | "medium" | "high" | "critical";
+  isLegitimateOrganization?: boolean;
   verdict: string;
   reasoning: string;
   observations: string[];

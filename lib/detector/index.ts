@@ -99,24 +99,34 @@ export function analyze(input: AnalysisInput): AnalysisResult {
 export async function analyzeAsync(input: AnalysisInput): Promise<AnalysisResult> {
   const baseResult = analyze(input);
 
-  // If Gemini API is available, enrich with AI observations
+  // If Gemini API is available, enrich with real AI intelligence
   if (process.env.GEMINI_API_KEY && (input.text || input.url || input.orgName)) {
     const aiOutput = await analyzeWithAi(input.url, input.text, input.orgName, input.contactEmail);
-    if (aiOutput.isAiPowered) {
-      const adjustedScore = Math.min(100, Math.max(0, baseResult.score + aiOutput.aiScoreOffset));
+    if (aiOutput.isAiPowered && aiOutput.detailedAnalysis) {
+      const ai = aiOutput.detailedAnalysis;
+      
+      // Real AI-determined risk score directly from Gemini analysis
+      const finalScore = ai.riskScore;
       const riskCategory: RiskCategory =
-        adjustedScore <= 25 ? "Low" : adjustedScore <= 55 ? "Medium" : adjustedScore <= 80 ? "High" : "Critical";
+        finalScore <= 25 ? "Low" : finalScore <= 55 ? "Medium" : finalScore <= 80 ? "High" : "Critical";
       const level: AnalysisResult["level"] =
-        adjustedScore <= 25 ? "safe" : adjustedScore <= 55 ? "suspicious" : "high-risk";
+        finalScore <= 25 ? "safe" : finalScore <= 55 ? "suspicious" : "high-risk";
 
-      // If AI identified specific red flags, append them to signals if not already present
-      const additionalSignals = [...baseResult.signals];
-      if (aiOutput.detailedAnalysis?.keyRedFlags) {
-        aiOutput.detailedAnalysis.keyRedFlags.forEach((flag, idx) => {
-          additionalSignals.push({
-            id: `ai-flag-${idx}`,
+      const positiveIndicators = [...baseResult.positiveIndicators];
+      const isOrgRecognized = Boolean(ai.isLegitimateOrganization || baseResult.trustedDomain);
+
+      if (ai.isLegitimateOrganization && input.orgName) {
+        positiveIndicators.push(`Accredited / recognized organization verified: "${input.orgName}" confirmed authentic by AI intelligence.`);
+      }
+
+      // If AI identified specific red flags, append them
+      const signals = [...baseResult.signals];
+      if (ai.keyRedFlags && ai.keyRedFlags.length > 0) {
+        ai.keyRedFlags.forEach((flag, idx) => {
+          signals.push({
+            id: `ai-red-flag-${idx}`,
             category: "language",
-            severity: aiOutput.detailedAnalysis?.riskRating || "high",
+            severity: ai.riskRating || "high",
             weight: 10,
             evidence: `AI Detected Flag: ${flag}`,
           });
@@ -125,19 +135,20 @@ export async function analyzeAsync(input: AnalysisInput): Promise<AnalysisResult
 
       return {
         ...baseResult,
-        score: adjustedScore,
+        score: finalScore,
         riskCategory,
         level,
+        trustedDomain: isOrgRecognized,
         isAiPowered: true,
-        aiAnalysis: aiOutput.detailedAnalysis,
-        summary: aiOutput.detailedAnalysis?.verdict || baseResult.summary,
-        signals: additionalSignals,
+        aiAnalysis: ai,
+        summary: ai.verdict || baseResult.summary,
+        signals,
+        positiveIndicators,
         unverifiedFactors: [
-          ...baseResult.unverifiedFactors,
-          ...aiOutput.aiObservations.map((obs) => `AI Observation: ${obs}`),
+          ...ai.observations.map((obs) => `AI Observation: ${obs}`),
         ],
-        recommendedActions: aiOutput.detailedAnalysis?.suggestedAction
-          ? [aiOutput.detailedAnalysis.suggestedAction, ...baseResult.recommendedActions]
+        recommendedActions: ai.suggestedAction
+          ? [ai.suggestedAction, ...baseResult.recommendedActions]
           : baseResult.recommendedActions,
       };
     }

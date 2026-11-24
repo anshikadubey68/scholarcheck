@@ -40,22 +40,21 @@ Analyze this scholarship opportunity:
 ${(text || "").slice(0, 3000)}
 """
 
-Evaluate this offer rigorously for:
-1. Deceptive / lookalike domains, throwaway TLDs, or missing SSL
-2. Any request for upfront payment, processing fees, application fees, gift cards, or UPI transfers (real scholarships are 100% free)
-3. False urgency ("Only 2 spots left!", "Apply in 24 hours") or guaranteed acceptance without merit review
-4. Requests for sensitive identity data (passwords, bank logins, Aadhaar/SSN without official portal)
-5. Free email addresses (e.g. gmail.com, yahoo.com) used for official government or institutional programs
+Evaluate this offer rigorously:
+1. Organization Legitimacy: Is "${orgName || "the organization"}" a real, recognized company, foundation, university, or government body (e.g. Tata Capital, Reliance, NSP, ONGC, etc.)?
+2. Scam Patterns: Any request for upfront payment, application fees, gift cards, or UPI deposits (genuine scholarships NEVER charge fees)?
+3. Phishing / Malice: False urgency, guaranteed selection without review, or requests for bank logins/Aadhaar/passwords?
 
-Respond ONLY with a JSON object in this exact schema (no markdown formatting, no code blocks):
+Respond ONLY with a JSON object in this exact schema (no markdown, no backticks):
 {
+  "riskScore": number between 0 and 100,
   "riskRating": "low" | "medium" | "high" | "critical",
-  "pointsAdjustment": number between -20 and 35,
+  "isLegitimateOrganization": boolean,
   "verdict": "Clear one-sentence overall verdict for the student",
-  "reasoning": "2-3 sentences explaining exactly why this offer is safe, suspicious, or dangerous",
-  "observations": ["Observation 1", "Observation 2", "Observation 3"],
-  "keyRedFlags": ["Red flag 1 if any", "Red flag 2 if any"],
-  "suggestedAction": "Specific direct recommendation for the student"
+  "reasoning": "2-3 sentences explaining why this offer is safe, suspicious, or fraudulent",
+  "observations": ["Observation 1", "Observation 2"],
+  "keyRedFlags": ["Specific red flag if any"],
+  "suggestedAction": "Specific recommendation for the student"
 }`;
 
     const controller = new AbortController();
@@ -94,15 +93,17 @@ Respond ONLY with a JSON object in this exact schema (no markdown formatting, no
     const cleanedText = rawText.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
     const parsed = JSON.parse(cleanedText);
 
-    const offset = typeof parsed.pointsAdjustment === "number"
-      ? Math.max(-20, Math.min(35, parsed.pointsAdjustment))
-      : 0;
+    const riskScore = typeof parsed.riskScore === "number"
+      ? Math.max(0, Math.min(100, Math.round(parsed.riskScore)))
+      : parsed.riskRating === "critical" ? 90 : parsed.riskRating === "high" ? 70 : parsed.riskRating === "medium" ? 40 : 10;
 
     const obs: string[] = Array.isArray(parsed.observations) ? parsed.observations.slice(0, 4) : [];
     const redFlags: string[] = Array.isArray(parsed.keyRedFlags) ? parsed.keyRedFlags.slice(0, 4) : [];
 
     const detailedAnalysis: AiDetailedAnalysis = {
-      riskRating: parsed.riskRating || (offset > 15 ? "high" : offset > 5 ? "medium" : "low"),
+      riskScore,
+      riskRating: parsed.riskRating || (riskScore > 75 ? "critical" : riskScore > 50 ? "high" : riskScore > 25 ? "medium" : "low"),
+      isLegitimateOrganization: Boolean(parsed.isLegitimateOrganization),
       verdict: parsed.verdict || "AI analysis completed.",
       reasoning: parsed.reasoning || "Evaluation based on fraud indicators and linguistic pattern matching.",
       observations: obs,
@@ -111,7 +112,7 @@ Respond ONLY with a JSON object in this exact schema (no markdown formatting, no
     };
 
     return {
-      aiScoreOffset: offset,
+      aiScoreOffset: 0,
       aiObservations: obs,
       isAiPowered: true,
       detailedAnalysis,
