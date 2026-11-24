@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import FindScholarshipsClient from "../../components/FindScholarshipsClient";
 import { getDbScholarships } from "../../lib/scholarships";
 import { getCurrentUser } from "../../lib/auth";
@@ -9,6 +10,8 @@ export const metadata = {
 };
 
 export default async function FindScholarshipsPage() {
+  await connection();
+
   const [scholarships, session] = await Promise.all([
     getDbScholarships(),
     getCurrentUser(),
