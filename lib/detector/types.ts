@@ -17,6 +17,15 @@ export interface AnalysisInput {
   contactEmail?: string;
 }
 
+export interface AiDetailedAnalysis {
+  riskRating: "low" | "medium" | "high" | "critical";
+  verdict: string;
+  reasoning: string;
+  observations: string[];
+  keyRedFlags: string[];
+  suggestedAction?: string;
+}
+
 export interface AnalysisResult {
   score: number; // 0-100
   level: "safe" | "suspicious" | "high-risk"; // Legacy 3-tier compatibility
@@ -30,6 +39,7 @@ export interface AnalysisResult {
   timestamp: string;
   referenceId: string;
   isAiPowered?: boolean;
+  aiAnalysis?: AiDetailedAnalysis;
   domainDetails?: {
     host?: string;
     protocol?: string;

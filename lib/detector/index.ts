@@ -100,7 +100,7 @@ export async function analyzeAsync(input: AnalysisInput): Promise<AnalysisResult
   const baseResult = analyze(input);
 
   // If Gemini API is available, enrich with AI observations
-  if (process.env.GEMINI_API_KEY && input.text) {
+  if (process.env.GEMINI_API_KEY && (input.text || input.url || input.orgName)) {
     const aiOutput = await analyzeWithAi(input.url, input.text, input.orgName, input.contactEmail);
     if (aiOutput.isAiPowered) {
       const adjustedScore = Math.min(100, Math.max(0, baseResult.score + aiOutput.aiScoreOffset));
@@ -109,16 +109,36 @@ export async function analyzeAsync(input: AnalysisInput): Promise<AnalysisResult
       const level: AnalysisResult["level"] =
         adjustedScore <= 25 ? "safe" : adjustedScore <= 55 ? "suspicious" : "high-risk";
 
+      // If AI identified specific red flags, append them to signals if not already present
+      const additionalSignals = [...baseResult.signals];
+      if (aiOutput.detailedAnalysis?.keyRedFlags) {
+        aiOutput.detailedAnalysis.keyRedFlags.forEach((flag, idx) => {
+          additionalSignals.push({
+            id: `ai-flag-${idx}`,
+            category: "language",
+            severity: aiOutput.detailedAnalysis?.riskRating || "high",
+            weight: 10,
+            evidence: `AI Detected Flag: ${flag}`,
+          });
+        });
+      }
+
       return {
         ...baseResult,
         score: adjustedScore,
         riskCategory,
         level,
         isAiPowered: true,
+        aiAnalysis: aiOutput.detailedAnalysis,
+        summary: aiOutput.detailedAnalysis?.verdict || baseResult.summary,
+        signals: additionalSignals,
         unverifiedFactors: [
           ...baseResult.unverifiedFactors,
           ...aiOutput.aiObservations.map((obs) => `AI Observation: ${obs}`),
         ],
+        recommendedActions: aiOutput.detailedAnalysis?.suggestedAction
+          ? [aiOutput.detailedAnalysis.suggestedAction, ...baseResult.recommendedActions]
+          : baseResult.recommendedActions,
       };
     }
   }

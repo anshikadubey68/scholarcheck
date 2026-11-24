@@ -66,9 +66,13 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
                 ✓ Verified Provider
               </span>
             )}
-            {result.isAiPowered && (
-              <span className="ai-badge">
-                ✨ AI Analyzed
+            {result.isAiPowered ? (
+              <span className="ai-badge" style={{ background: "linear-gradient(135deg, #8B5CF6, #6366F1)", color: "#fff", fontWeight: 700, padding: "3px 10px", borderRadius: 999, fontSize: "0.75rem", display: "inline-flex", alignItems: "center", gap: 5 }}>
+                <span>✨</span> Gemini AI Analyzed
+              </span>
+            ) : (
+              <span style={{ fontSize: "0.75rem", color: "var(--muted)", border: "1px solid var(--line)", padding: "2px 8px", borderRadius: 999 }}>
+                Heuristic Engine
               </span>
             )}
           </div>
@@ -78,6 +82,57 @@ export default function ReportView({ result, onReset }: ReportViewProps) {
           </p>
         </div>
       </div>
+
+      {/* Gemini AI Intelligence Section (Shown when AI analysis completed) */}
+      {result.isAiPowered && result.aiAnalysis && (
+        <div
+          style={{
+            background: "linear-gradient(to right bottom, rgba(139, 92, 246, 0.05), rgba(99, 102, 241, 0.08))",
+            border: "1px solid rgba(139, 92, 246, 0.25)",
+            borderRadius: 12,
+            padding: "20px 24px",
+            marginBottom: 24,
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: "1.2rem" }}>🤖</span>
+              <h3 style={{ fontSize: "1.05rem", fontWeight: 700, margin: 0, color: "var(--ink)" }}>
+                Gemini AI Semantic Fraud Intelligence
+              </h3>
+            </div>
+            <span style={{ fontSize: "0.75rem", background: "rgba(139, 92, 246, 0.15)", color: "#8B5CF6", padding: "3px 10px", borderRadius: 999, fontWeight: 700 }}>
+              Live AI Assessment
+            </span>
+          </div>
+
+          <p style={{ fontSize: "0.95rem", lineHeight: 1.6, color: "var(--ink)", marginBottom: 14 }}>
+            {result.aiAnalysis.reasoning}
+          </p>
+
+          {result.aiAnalysis.keyRedFlags && result.aiAnalysis.keyRedFlags.length > 0 && (
+            <div style={{ marginTop: 12, marginBottom: 12 }}>
+              <span style={{ fontSize: "0.8rem", textTransform: "uppercase", fontWeight: 700, color: "#DC2626", letterSpacing: "0.05em" }}>
+                AI Flagged Anomalies:
+              </span>
+              <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
+                {result.aiAnalysis.keyRedFlags.map((flag, idx) => (
+                  <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.88rem", color: "var(--ink)" }}>
+                    <span style={{ color: "#DC2626", fontWeight: 700 }}>✕</span>
+                    <span>{flag}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {result.aiAnalysis.suggestedAction && (
+            <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed rgba(139, 92, 246, 0.3)", fontSize: "0.88rem", color: "var(--ink)" }}>
+              <strong>AI Action Recommendation:</strong> {result.aiAnalysis.suggestedAction}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Navigation Filter Tabs */}
       <div className="report-tabs-grid">
