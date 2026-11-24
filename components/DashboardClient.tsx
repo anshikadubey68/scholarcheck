@@ -144,11 +144,10 @@ export default function DashboardClient({
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await authClient.signOut();
     } catch (e) {
       console.error("Logout failed:", e);
     } finally {
-      window.dispatchEvent(new CustomEvent("auth-change", { detail: { user: null } }));
       window.location.href = "/";
     }
   };

@@ -54,9 +54,8 @@ export default function Navbar() {
     setMobileMenuOpen(false);
     try {
       await authClient.signOut();
-    } catch {
-      // Fallback to logout endpoint if needed
-      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {
+      console.error("Sign out error:", e);
     }
     window.location.href = "/login";
   };

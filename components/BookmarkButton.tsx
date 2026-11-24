@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Toggle } from "@/components/ui/toggle";
+import { Button } from "@/components/ui/button";
 import { Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -71,19 +71,20 @@ export default function BookmarkButton({
   };
 
   return (
-    <Toggle
+    <Button
       variant="outline"
       size={size === "sm" ? "sm" : "default"}
-      pressed={saved}
-      onPressedChange={(pressed) => handleToggle(pressed)}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation();
+        handleToggle();
+      }}
       disabled={loading}
       aria-label={saved ? "Remove bookmark" : "Bookmark scholarship"}
       title={saved ? "Saved in Dashboard" : "Save scholarship"}
       className={cn(
         "cursor-pointer font-medium transition-all select-none gap-1.5",
         saved
-          ? "border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 data-[state=on]:bg-rose-500/10 data-[state=on]:text-rose-600 dark:data-[state=on]:text-rose-400"
+          ? "border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20"
           : "border-border text-muted-foreground hover:text-foreground",
         className
       )}
@@ -98,6 +99,6 @@ export default function BookmarkButton({
       <span className={cn(size === "sm" ? "text-xs font-semibold" : "text-sm font-semibold")}>
         {saved ? "Saved" : "Save"}
       </span>
-    </Toggle>
+    </Button>
   );
 }
